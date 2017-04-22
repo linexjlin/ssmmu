@@ -1,2 +1,2 @@
 # ss-mmu
-For ShadowSocks-libev Manage Multiple User
+For [ShadowSocks-libev](https://github.com/shadowsocks/shadowsocks-libev/blob/master/doc/ss-manager.asciidoc) Manage Multiple User
