@@ -17,8 +17,11 @@ type SSMMU struct {
 	conn    net.Conn
 }
 
+var statData chan []byte
+
 func NewSSMMU(MAType, MAAddr string, Timeouts ...time.Duration) *SSMMU {
 	Timeouts = append(Timeouts, 1500*time.Millisecond)
+	statData = make(chan []byte, 1024*1024)
 	return &SSMMU{
 		MAType:  MAType,
 		MAAddr:  MAAddr,
@@ -72,6 +75,11 @@ func (self *SSMMU) command(cmd string, shouldRecv ...string) (succ bool, err err
 		return
 	}
 
+	if len(rsp) > 3 && string(rsp)[:5] == "stat:" {
+		statData <- rsp
+		succ = true
+	}
+
 	if string(rsp) == shouldRecv[0] {
 		succ = true
 	}
@@ -90,9 +98,9 @@ func (self *SSMMU) Remove(port int) (succ bool, err error) {
 	return
 }
 
-func (self *SSMMU) Ping() (succ bool, duration time.Duration, err error) {
+func (self *SSMMU) ping() (succ bool, duration time.Duration, err error) {
 	st := time.Now()
-	succ, err = self.command("ping", "pong")
+	succ, err = self.command("ping")
 	duration = time.Since(st)
 	return
 }
@@ -100,7 +108,8 @@ func (self *SSMMU) Ping() (succ bool, duration time.Duration, err error) {
 func (self *SSMMU) Stat(timeout time.Duration) (resp []byte, err error) {
 	recvC := make(chan bool)
 	go func() {
-		resp, err = self.recv()
+		self.ping()
+		resp = <-statData
 		recvC <- true
 	}()
 
