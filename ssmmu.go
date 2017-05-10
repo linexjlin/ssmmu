@@ -86,19 +86,17 @@ func (self *SSMMU) command(cmd string, shouldRecv ...string) (succ bool, err err
 	return
 }
 
-func (self *SSMMU) Close() error {
-	return self.conn.Close()
-}
-
 func (self *SSMMU) Add(port int, passwd string) (succ bool, err error) {
 	cmd := fmt.Sprintf(`add: {"server_port": %d, "password": "%s"}`, port, passwd)
 	succ, err = self.command(cmd)
+	defer self.conn.Close()
 	return
 }
 
 func (self *SSMMU) Remove(port int) (succ bool, err error) {
 	cmd := fmt.Sprintf(`remove: {"server_port": %d}`, port)
 	succ, err = self.command(cmd)
+	defer self.conn.Close()
 	return
 }
 
@@ -123,5 +121,6 @@ func (self *SSMMU) Stat(timeout time.Duration) (resp []byte, err error) {
 		err = errors.New("Stat timeout")
 	}
 
+	defer self.conn.Close()
 	return
 }
