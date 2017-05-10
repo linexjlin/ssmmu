@@ -86,6 +86,10 @@ func (self *SSMMU) command(cmd string, shouldRecv ...string) (succ bool, err err
 	return
 }
 
+func (self *SSMMU) Close(port int, passwd string) error {
+	return self.conn.Close()
+}
+
 func (self *SSMMU) Add(port int, passwd string) (succ bool, err error) {
 	cmd := fmt.Sprintf(`add: {"server_port": %d, "password": "%s"}`, port, passwd)
 	succ, err = self.command(cmd)
