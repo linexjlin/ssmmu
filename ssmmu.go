@@ -86,7 +86,7 @@ func (self *SSMMU) command(cmd string, shouldRecv ...string) (succ bool, err err
 	return
 }
 
-func (self *SSMMU) Close(port int, passwd string) error {
+func (self *SSMMU) Close() error {
 	return self.conn.Close()
 }
 
