@@ -4,28 +4,36 @@ import "testing"
 import "time"
 
 func setup() (mmu *SSMMU) {
-	mmu = NewSSMMU("udp", "127.0.0.1:2043")
+	mmu = NewSSMMU("udp", "192.168.168.2:2043")
 	return
 }
 
 func TestAddPort(t *testing.T) {
-	mmu := setup()
-	succ, err := mmu.Add(8592, "m")
-	if err != nil {
-		t.Error(err)
-	}
-	if !succ {
-		t.Fatal("add port should be succ")
+	for i := 0; i < 10; i++ {
+		mmu := setup()
+		succ, err := mmu.Add(8592+i, "m")
+		if err != nil {
+			t.Error(err)
+		}
+		if !succ {
+			t.Fatal("add port should be succ")
+		}
+		time.Sleep(time.Second * 1)
+		mmu.Close()
 	}
 }
 
 func TestStat(t *testing.T) {
-	mmu := setup()
-	data, err := mmu.Stat(15 * time.Second)
-	if err != nil {
-		t.Error(err)
+	for i := 0; i < 3; i++ {
+		mmu := setup()
+		data, err := mmu.Stat(15 * time.Second)
+		if err != nil {
+			t.Error(err)
+		}
+		t.Log(string(data))
+		time.Sleep(time.Second * 1)
+		mmu.Close()
 	}
-	t.Log(string(data))
 }
 
 func TestRemovePort(t *testing.T) {
