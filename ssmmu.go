@@ -75,7 +75,10 @@ func (self *SSMMU) command(cmd string, shouldRecv ...string) (succ bool, err err
 		return
 	}
 
-	if len(rsp) > 3 && string(rsp)[:5] == "stat:" {
+	fmt.Println("cmd:", cmd, "get rsp:", string(rsp))
+	go self.recvStat()
+
+	if len(rsp) > 4 && string(rsp)[:5] == "stat:" {
 		statData <- rsp
 		succ = true
 	}
@@ -83,6 +86,16 @@ func (self *SSMMU) command(cmd string, shouldRecv ...string) (succ bool, err err
 	if string(rsp) == shouldRecv[0] {
 		succ = true
 	}
+	return
+}
+
+func (self *SSMMU) recvStat() (succ bool, err error) {
+	rsp, err := self.recv()
+	if err != nil {
+		return
+	}
+	statData <- rsp
+	succ = true
 	return
 }
 
@@ -100,7 +113,7 @@ func (self *SSMMU) Remove(port int) (succ bool, err error) {
 
 func (self *SSMMU) ping() (succ bool, duration time.Duration, err error) {
 	st := time.Now()
-	succ, err = self.command("ping")
+	succ, err = self.command("ping", "pong")
 	duration = time.Since(st)
 	return
 }
@@ -115,6 +128,7 @@ func (self *SSMMU) Stat(timeout time.Duration) (resp []byte, err error) {
 	recvC := make(chan bool)
 	go func() {
 		self.ping()
+		self.recvStat()
 		resp = <-statData
 		recvC <- true
 	}()
