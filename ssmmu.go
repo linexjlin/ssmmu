@@ -75,8 +75,8 @@ func (self *SSMMU) command(cmd string, shouldRecv ...string) (succ bool, err err
 		return
 	}
 
-	fmt.Println("cmd:", cmd, "get rsp:", string(rsp))
-	go self.recvStat()
+	//fmt.Println("cmd:", cmd, "get rsp:", string(rsp))
+	//go self.recvStat()
 
 	if len(rsp) > 4 && string(rsp)[:5] == "stat:" {
 		statData <- rsp
